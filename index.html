@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>I Wanna Be The Ranger 2 | Protótipo</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#10121b;color:#fff;font-family:monospace;display:flex;align-items:center;justify-content:center;min-height:100vh}
+#wrap{width:min(100vw,960px);padding:8px}canvas{width:100%;display:block;border:3px solid #292e40;image-rendering:pixelated;background:#7db5e8}
+#hud{display:flex;justify-content:space-between;padding:8px 2px;color:#d9e6ff;font-size:14px}
+#overlay{position:fixed;inset:0;background:#080a10e8;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px}
+.panel{max-width:680px;border:2px solid #d84b4b;background:#171a25;padding:24px;box-shadow:0 0 30px #000}
+h1{color:#f44;margin-top:0}button{background:#b92d39;color:white;border:2px solid #fca5a5;font: bold 18px monospace;padding:12px 24px;cursor:pointer;margin-top:12px}
+#touch{display:none;justify-content:space-between;margin-top:8px;touch-action:none}.group{display:flex;gap:8px}.touchbtn{background:#202638;color:#fff;border:1px solid #7686a7;padding:14px 18px;font:20px monospace;user-select:none}
+@media(pointer:coarse){#touch{display:flex}}
+</style></head><body><div id="wrap"><canvas id="game" width="960" height="540"></canvas><div id="hud"><span>REGIÃO 1: O VILAREJO</span><span>← → mover | Espaço pular</span></div><div id="touch"><div class="group"><button class="touchbtn" data-key="left">◀</button><button class="touchbtn" data-key="right">▶</button></div><button class="touchbtn" data-key="jump">⤴ PULAR</button></div></div>
+<div id="overlay"><div class="panel"><h1>I WANNA BE THE RANGER 2</h1><p>PRÓLOGO: O FIM DA PAZ</p><p>Depois de tudo o que aconteceu, The Kid finalmente chega ao vilarejo.<br>Mas a paz não vai durar muito...</p><button id="start">INICIAR PROTÓTIPO</button><p style="color:#aaa;font-size:12px">Protótipo jogável • Região 1</p></div></div>
+<script>
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+ctx.imageSmoothingEnabled=false;
+const sprites=['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC8AAAA1CAYAAADRarJRAAAB4ElEQVR4nO2ZrU8DMQDFXxnscgIzOYvgTyCzIOdAkkuwyFNTBBLU1CSWhOAGapNgF/4EBHZyBnG5kaUIrqzrXXvtfdDc6M/ssn69e33trjdCcUNBrwkayI5tAWVw4m3hxNvCibeFE28LJ94WTrwtnHhbOPG22K17AJ8QWrRtRKnyhOecz0J0/PSwo932+X2hVc85L8K7buK42Ib1I8t+bbFRiX68v1K2Pb+41RrDxYaRty2Kjvu9ENFs9HsNANFspL1ga4lNkZxn4fb5KshapCwy4rUuznkGy6hsn2eLUtmHwQzUEpsHAEFyze8c4s5SlkbHhlT558I4iUsgKdeJBD8rX62Wsm6jna8k81mO+91Nl6N5WFnWGcbixxonI154NA9T3y+e1nU7Z+l6jL3Vat1Pxq/tdsZm6Hn0YLnU6oTFRea4WMbcliEubFncttP5QRyToedRANCdAT7Lfi/57Jo9s/Cu5y1wrX2e3QSQvpEA+tNcFNmj8XbGhmcQxwT4mYGPdnuzkJsJ3vGjpN5bUr5/fKkc4/P1DkD+AYSn0c6XfrYxeZ2X5T5znGHi/J+dpIC0UMBMrEijY1Pa+ZN+X6vey3RadqgU/9v5yWSizGzegs57H6mi9gWrG6siNDo23wNXqEfbqxNKAAAAAElFTkSuQmCC', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADEAAAA1CAYAAADoDQMKAAAB6ElEQVR4nO2ZvU4CQRSFz8gK2cKG0tbCRzC0WtKJnSGxtaSyMpFYWVnamhg7tLWzNTyCL2BJY0FYIddCBofl7t/MoOM4X0KygZ2fu+fce3dZQUT404g+bfz2HmwQgnCFEIQrhCBcIQThCiEIVwhBuEIIwhVCEK4Q2ZwsFkLrMXFMJEzWDUpIVAUOd5uVxj6+jozXD0qkc6CqCnKMnEc3N6zYKWvz97fnhWOPTy6N1/fCTtpBFJVTVYW41UPc6q0cA3YS28hOOjnAEfoELHdsgE/m8cs1e2yL/63EmEjk9Qk1ednxFhUxUuJu/pGolWYdtsnCCzsJ3ZcsAyGom/N7kRKq3T5qtcL1ptMpX4Z9eclSSokB051VFeJtpYS+5Sc0h6kS0VWjQQCwkyQAgCMiwW1akrV54CsA9bvRw/LYZocPcnM2W56nYgf3wk7R2WQiAEAqkqVCOok5C6WVaXaKN6AWgKLekoUfSpQ5qQu+ZOpeOcCOApKV6iRtBXwnOxeE6cIcWrfkXvcJVQ3JxVwVjr16HQAwTBJs7Z/mLvj+fAPA/EFogddKcEh1nnLOGSpqqYrIq89hrIjok/YNYBY6/8caBeKLnaw/Y6sctNvrnH6BF0pYzYky+WCttEpEn6za6afsk8YLO30CcIC7zK3y7vkAAAAASUVORK5CYII=', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADEAAAA1CAYAAADoDQMKAAAB9ElEQVR4nO2ZvU7DMBSFj2lp1IGlIysDj4BYYewGbKgSKyMTExKIqVNHViTEVtgqJlirPgIvwNiFIWppZZbc1nHtNLVdYVyfKUocxzffuffmh3HO8a/F7vjWX6/BhWIQvigG4YtiEL4oBuGLYhC+KAbhi2IQvigG4YuqriaqM2b8iphyzmyuHUkAiwRO9hulz339HNpeHkAkkaewCgH5HJrHNDes7VS0+OfHm8Jzzy/ubS8PYJPttKycygTqh1dI+53ZNgCk/Y6zxLayk0keqBT7BBx2bJIqmclK8rYrbS4J8rCuT1DyFs7hkIiVnZ4AtLJtsdLIlWjdCsJOzOQnSzezUUtzvIxVREo/lUrh2Mlkoi/BofxkWUqiq+jOIoH6bv6up1+r54EtiWo7SfjeeAwAOMuqjmrhwKJ9xABo8eK+4ct8bOM0P07U9nQ6n8egewdhp+r1aMTaScIBPQFAbyEVARLdfZ3kAmBaksMgsWwAEVCVTZtmJs5n2xRz1YlsBQCU7Kog1tWJjR7Jg+4TIhHSbUZG1kGtBgAYZMd3ji4LL/j98QDA/kVopqBJqNROEv6m2D/QEALyVIgAySUJowdA0irfX50tWlYodrJ6KTpuNkuNe+/1Fqi5JBMECauc0Klsrjihwe648082QHmbuVIQdvoFzSrFmIkFHbYAAAAASUVORK5CYII=', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAA1CAYAAAADOrgJAAAB+0lEQVR4nO2ZL0/DQBjGn2NjSwVmchbBRyCzIOeYJCRY5NQUgqBQk1gSghtYHJbsIyCwyBnE0rLlEPTC2/Xaa68vcFzulyxrtrvrPXneP71USCnxrxEXEgC2/nofXAQhrhGEuEYQ4hpBiGsEIa4RhLhGEOIaQYhrtDkXi4SwOm4upRRN7x0coVAnjvZ6teY+vCw4thAcAZDPibpuqDlqnSa5whJaRQLubs6Nc49PLzm24E9oWQsxlVrqRjQYIxqMc9cAX7I3Ci2bnNAR+giBtbMD+gRfPk+115wER5ZSirI+QhNaO5/ZmUaO3KYfBa1APxVCRXgTWsL2Rc9MCHlS8r/JERp6H62W8X6r1Upfon170VPbkVma4NSNqE/K61t5kuvgcKS0as0MjyFUAJAVEfWnWNxnx/dGeqHb63V2HYtO701ota+6XQkAu0lSaYIKqaJwor/3Rub1aFEw9Z4y/HFkEscCAOo6Q+M/GqTf/epNkMsJRa5qKUFAVpQKKe4NUKwe533rI7nyO4ljoVx57XS+/9gIOerGfjpuniTYOTgrveH70zUAnsMUxRtHKnd23Rl9nzqGL0cU1Bnlgo7GzqQ5UlmICrdHw7h5xapHaSTG+2QvQvWbiWEcDcHD4dByW/XxxhHrg5WOKu9HuMtupcf4uvxmKG3iTWh9Am8evq5IIxZVAAAAAElFTkSuQmCC'];
+const imgs=sprites.frames.map(src=>{let im=new Image();im.src=src;return im});
+let keys={},started=false,anim=0,camera=0,player={x:65,y:0,vx:0,vy:0,w:28,h:40,ground:false,face:1},worldW=2500;
+const platforms=[{x:0,y:475,w:2500,h:80},{x:270,y:385,w:120,h:18},{x:470,y:330,w:140,h:18},{x:730,y:400,w:180,h:18},{x:1050,y:355,w:160,h:18},{x:1300,y:300,w:140,h:18},{x:1550,y:410,w:180,h:18},{x:1840,y:345,w:140,h:18},{x:2150,y:390,w:160,h:18}];
+player.y=435;
+document.getElementById('start').onclick=()=>{started=true;document.getElementById('overlay').style.display='none'};
+function drawBg(){
+ ctx.fillStyle='#80b9ed';ctx.fillRect(0,0,960,540);
+ // far hills
+ for(let i=0;i<7;i++){let x=(i*330-camera*.18)%1200-120;ctx.fillStyle=i%2?'#8cbf8b':'#6ea77a';ctx.beginPath();ctx.moveTo(x,390);ctx.lineTo(x+110,245);ctx.lineTo(x+240,390);ctx.fill();}
+ // village rooftops
+ for(let i=0;i<10;i++){let x=i*270-camera*.42+((camera*.42)%270);ctx.fillStyle='#d8c6a2';ctx.fillRect(x,315,135,160);ctx.fillStyle='#8c4140';ctx.beginPath();ctx.moveTo(x-12,315);ctx.lineTo(x+68,245);ctx.lineTo(x+148,315);ctx.fill();ctx.fillStyle='#563c31';ctx.fillRect(x+30,360,30,60);ctx.fillRect(x+82,340,28,28);}
+ ctx.fillStyle='#f4d57d';ctx.fillRect(0,455,960,85);
+}
+function drawNinja(x,y){
+ ctx.fillStyle='#aa2531';ctx.fillRect(x-10,y-34,20,27);ctx.fillStyle='#ddd';ctx.fillRect(x-4,y-25,8,4);ctx.fillStyle='#4b2b25';ctx.fillRect(x-12,y-7,24,5);ctx.fillStyle='#191924';ctx.fillRect(x-8,y-3,7,14);ctx.fillRect(x+2,y-3,7,14);}
+function update(){
+ if(!started)return;
+ const left=keys.left||keys.a,right=keys.right||keys.d;
+ player.vx=left?-3.2:right?3.2:0;
+ if(player.vx)player.face=player.vx>0?1:-1;
+ if(keys.jump&&player.ground){player.vy=-10.5;player.ground=false;keys.jump=false;}
+ player.x+=player.vx;player.vy+=.52;player.y+=player.vy;player.ground=false;
+ for(const p of platforms){if(player.vy>=0&&player.x+player.w>p.x&&player.x<p.x+p.w&&player.y+player.h>=p.y&&player.y+player.h-p.vy<=p.y){player.y=p.y-player.h;player.vy=0;player.ground=true;}}
+ player.x=Math.max(0,Math.min(worldW-player.w,player.x));
+ camera=Math.max(0,Math.min(worldW-960,player.x-420));
+ anim+=Math.abs(player.vx)*.16;
+}
+function draw(){
+ drawBg();
+ ctx.save();ctx.translate(-camera,0);
+ // platforms/ground
+ platforms.forEach((p,i)=>{ctx.fillStyle=i===0?'#3d7c46':'#7a5a40';ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle='#5fa452';ctx.fillRect(p.x,p.y,p.w,6);});
+ // street lanterns
+ for(let x=160;x<worldW;x+=390){ctx.fillStyle='#5b4635';ctx.fillRect(x,420,8,38);ctx.fillStyle='#ffd98c';ctx.fillRect(x-4,400,16,18);}
+ // suspicious ninjas in the distance
+ drawNinja(850,475);drawNinja(1660,475);drawNinja(2310,475);
+ let frame=player.vx?Math.floor(anim)%4:0,im=imgs[frame];
+ if(im.complete){ctx.save();if(player.face<0){ctx.translate(player.x+player.w,0);ctx.scale(-1,1);ctx.drawImage(im,0,player.y-4,player.w+6,player.h+12);}else ctx.drawImage(im,player.x,player.y-4,player.w+6,player.h+12);ctx.restore();}
+ ctx.restore();
+ // checkpoint/message hint
+ ctx.fillStyle='#172033cc';ctx.fillRect(14,14,330,54);ctx.fillStyle='#fff';ctx.font='16px monospace';ctx.fillText('THE KID: "Finalmente... paz."',26,36);ctx.fillStyle='#c6d6ff';ctx.fillText('Explore a vila e siga pela direita.',26,57);
+ if(player.x>worldW-120){ctx.fillStyle='#fff';ctx.fillRect(890,250,8,200);ctx.fillStyle='#ffdf7c';ctx.font='22px monospace';ctx.fillText('SAÍDA →',820,235);}
+ if(!started){ctx.fillStyle='#0005';ctx.fillRect(0,0,960,540);}
+}
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight',' ','ArrowUp'].includes(e.key))e.preventDefault();keys[e.key==='ArrowLeft'?'left':e.key==='ArrowRight'?'right':e.key===' '||e.key==='ArrowUp'?'jump':e.key.toLowerCase()]=true;});
+addEventListener('keyup',e=>{keys[e.key==='ArrowLeft'?'left':e.key==='ArrowRight'?'right':e.key===' '||e.key==='ArrowUp'?'jump':e.key.toLowerCase()]=false;});
+document.querySelectorAll('.touchbtn').forEach(b=>{const k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true});['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,()=>keys[k]=false));});
+</script></body></html>
